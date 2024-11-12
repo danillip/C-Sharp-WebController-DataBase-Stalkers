@@ -1,0 +1,16 @@
+@{
+        ViewData["Title"] = "Главная страница";
+    }
+
+    <h1>Добро пожаловать в базу данных S.T.A.L.K.E.R.</h1>
+
+    <p>Здесь вы можете управлять данными о сталкерах, кланах, артефактах и других элементах игры.</p>
+
+    <div>
+        <h2>Управление данными</h2>
+        <ul>
+            <li><a asp-controller="Stalker" asp-action="Index">Список сталкеров</a></li>
+            <li><a asp-controller="Clan" asp-action="Index">Список кланов</a></li>
+            <li><a asp-controller="Artifact" asp-action="Index">Список артефактов</a></li>
+        </ul>
+    </div>

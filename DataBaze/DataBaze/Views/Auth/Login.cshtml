@@ -1,0 +1,126 @@
+﻿@{
+    ViewData["Title"] = "Вход";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <style>
+        /* Основной стиль для всей страницы */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+
+        /* Контейнер для формы */
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        /* Заголовок */
+        .login-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Поля ввода */
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        /* Кнопка входа */
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Кнопка входа при наведении */
+        .login-container button:hover {
+            background-color: #45a049;
+        }
+
+        /* Кнопка гостевого входа */
+        .guest-button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .guest-button:hover {
+            background-color: #0069d9;
+        }
+
+        /* Ошибки */
+        .error-message {
+            color: #d9534f;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Вход</h2>
+
+        <!-- Форма для входа как админ -->
+        <form asp-action="Login" method="post">
+            <div>
+                <label for="username">Логин:</label>
+                <input type="text" id="username" name="username" required />
+            </div>
+            <div>
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" required />
+            </div>
+            <div>
+                <button type="submit">Войти</button>
+            </div>
+            @if (!ViewData.ModelState.IsValid)
+            {
+                    <div class="error-message">
+                        <span>@ViewData.ModelState.Values.First().Errors.FirstOrDefault()?.ErrorMessage</span>
+                    </div>
+            }
+        </form>
+
+        <!-- Кнопка для входа в качестве гостя -->
+        <form asp-action="GuestLogin" method="post">
+            <button type="submit" class="guest-button">Войти как Гость</button>
+        </form>
+    </div>
+</body>
+</html>

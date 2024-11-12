@@ -1,0 +1,556 @@
+﻿@model IEnumerable<DataBaze.Stalker.Models.Clan>
+@using Microsoft.AspNetCore.Http
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Список кланов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            max-width: 800px;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .buttonADD {
+            width: 100%;
+            max-width: 280px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .btn-danger {
+            background-color: #f44336;
+        }
+
+        .btn-danger:hover {
+            background-color: #e53935;
+        }
+
+        .add-clan-form {
+            max-width: 500px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .add-clan-form label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        .add-clan-form input {
+            width: 90%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .return-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .return-button:hover {
+            background-color: #45a049;
+        }
+
+        /* Стиль для вводного окна */
+        .add-clan-form select {
+            width: 100%; /* Ширина аналогична полям ввода */
+            padding: 10px; /* Внутренний отступ */
+            border: 1px solid #ccc; /* Цвет рамки */
+            border-radius: 5px; /* Скругление углов */
+            margin-bottom: 10px; /* Внешний отступ снизу */
+            background-color: #fff; /* Цвет фона */
+            appearance: none; /* Убирает стандартный стиль браузера для выпадающего списка */
+        }
+
+        /* Стиль для стрелки выпадающего списка (добавьте при необходимости) */
+        .add-clan-form select::after {
+            content: "▼"; /* Стрелка вниз */
+            position: absolute; /* Позиционирование */
+            right: 10px; /* Отступ от правого края */
+            top: 50%; /* Центрирование по вертикали */
+            transform: translateY(-50%); /* Центрирование стрелки */
+            pointer-events: none; /* Игнорирование событий мыши для стрелки */
+        }
+
+
+        /* Стиль для модального окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        .modal-content input {
+            width: 90%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .button {
+            padding: 10px 15px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 4px;
+            background-color: #28a745; /* Основной зеленый цвет кнопки */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:disabled {
+            background-color: #6c757d; /* Цвет для отключенной кнопки */
+            cursor: not-allowed;
+        }
+
+        .button:hover:not(:disabled) {
+            background-color: #218838; /* Темно-зеленый цвет при наведении */
+        }
+    </style>
+</head>
+<body>
+    <h1>Список кланов</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Расположение</th>
+                <th>ID Лидера</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var clan in Model)
+            {
+                    <tr>
+                        <td>@clan.ClanId</td>
+                        <td>@clan.Name</td>
+                        <td>@clan.Location</td>
+                        <td>@clan.LeaderStalkerId</td>
+                        <td>
+                        @if (ViewBag.UserRole == "Admin")
+                        {
+                            <button class="btn" onclick="showEditForm(@clan.ClanId, '@clan.Name', '@clan.Location', '@clan.LeaderStalkerId')">Редактировать</button>
+                            <button class="btn btn-danger" onclick="deleteClan(@clan.ClanId)">Удалить</button>
+                        }
+                    </td>
+                    </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <button onclick="window.location.href='@Url.Action("Index", new { page = ViewBag.CurrentPage - 1 })'" 
+                class="button btn-primary" 
+            @(ViewBag.CurrentPage <= 1 ? "disabled" : "")>
+            Назад
+        </button>
+
+        <span>Страница @ViewBag.CurrentPage из @ViewBag.TotalPages</span>
+
+        <button onclick="window.location.href='@Url.Action("Index", new { page = ViewBag.CurrentPage + 1 })'" 
+                class="button btn-primary" 
+            @(ViewBag.CurrentPage >= ViewBag.TotalPages ? "disabled" : "")>
+            Вперед
+        </button>
+    </div>
+
+    @if (ViewBag.UserRole == "Admin")
+    {
+                    <button id="openAddClanModal" class="buttonADD">Добавить клан</button>
+    }
+
+    <a href="/" class="return-button">Вернуться на главную страницу</a>
+
+    @if (ViewBag.UserRole == "Admin")
+    {
+        <!-- Модальное окно для добавления нового клана -->
+        <div id="addClanModal" class="modal">
+            <div class="modal-content">
+                <h2>Добавить новый клан</h2>
+                <div id="addClanError" class="error-message"></div>
+                <form id="addClanForm" style="display: flex; flex-direction: column;">
+                    <!-- Ошибка для поля "Название" -->
+                    <div id="clanNameError" class="error-message" style="display: none; color: red;"></div>
+                    <label>Название:</label>
+                    <input type="text" name="Name" required id="clanNameInput" placeholder="Обязательно" />
+
+                    <!-- Ошибка для поля "Расположение" -->
+                    <div id="locationError" class="error-message" style="display: none; color: red;"></div>
+                    <label>Расположение:</label>
+                    <input type="text" name="Location" required id="locationInput" placeholder="Обязательно"/>
+
+                    <!-- Ошибка для поля "ID Лидера" -->
+                    <div id="leaderError" class="error-message" style="display: none; color: red;"></div>
+                    <label>ID Лидера:</label>
+                    <select name="LeaderStalkerId" id="leaderInput" style="width: 96%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px;">
+                        <option value="">Выберите лидера</option>
+                        @foreach (var stalker in ViewBag.NonLeaderStalkers)
+                        {
+                                <option value="@stalker.StalkerId">@stalker.StalkerId - @stalker.FirstName @stalker.LastName</option>
+                        }
+                    </select>
+
+                    <button type="button" class="btn" id="addClanButton" onclick="addClan()" disabled style="background-color: lightgrey;">Добавить</button>
+                    <button type="button" class="btn btn-danger" onclick="closeAddClanModal()">Отмена</button>
+                </form>
+            </div>
+        </div>
+    }
+
+
+<!-- Модальное окно для редактирования клана -->
+    @if (ViewBag.UserRole == "Admin")
+    {
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <h2>Редактировать клан</h2>
+                <div id="editClanError" class="error-message"></div>
+                <form id="editClanForm">
+                    <input type="hidden" name="ClanId" id="editClanId" />
+                    <label>Название:</label>
+                    <input type="text" name="Name" id="editName" required />
+                    <label>Расположение:</label>
+                    <input type="text" name="Location" id="editLocation" required />
+                    <label>ID Лидера:</label>
+                    <input type="number" name="LeaderStalkerId" id="editLeaderStalkerId" placeholder="Если есть" />
+
+                    <button type="button" class="btn" onclick="updateClan()">Сохранить изменения</button>
+                    <button type="button" class="btn btn-danger" onclick="closeEditModal()">Отмена</button>
+                </form>
+            </div>
+        </div>
+    }
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+$(document).ready(function () {
+    // Проверка валидации поля "Название" при вводе
+    $("#clanNameInput").on("input", function () {
+        validateClanName();
+        updateAddClanButtonState();
+    });
+
+    // Проверка валидации поля "Расположение"
+    $("#locationInput").on("input", function () {
+        validateLocation();
+        updateAddClanButtonState();
+    });
+
+    // Проверка валидации поля "ID Лидера" при изменении
+    $("#leaderInput").on("change", function () {
+        validateLeaderSelection();
+        updateAddClanButtonState();
+    });
+
+    // Функция для валидации названия клана
+    function validateClanName() {
+        const clanName = $("#clanNameInput").val();
+        const clanNamePattern = /^[A-Za-zА-Яа-яЁё]+$/; // Только буквы
+        let errorMessage = "";
+
+        if (clanName.length === 0) {
+            errorMessage = "Название клана обязательно для заполнения.";
+        } else if (!clanNamePattern.test(clanName)) {
+            errorMessage = "Название должно содержать только буквы.";
+        }
+
+        if (errorMessage) {
+            $("#clanNameError").text(errorMessage).show();
+            return false;
+        } else {
+            $("#clanNameError").hide();
+            return true;
+        }
+    }
+
+    // Функция для валидации расположения
+    function validateLocation() {
+        const location = $("#locationInput").val().trim();
+        let errorMessage = "";
+
+        if (location.length === 0) {
+            errorMessage = "Расположение обязательно для заполнения.";
+        }
+
+        if (errorMessage) {
+            $("#locationError").text(errorMessage).show();
+            return false;
+        } else {
+            $("#locationError").hide();
+            return true;
+        }
+    }
+
+    // Функция для валидации выбора лидера
+    function validateLeaderSelection() {
+        const leaderStalkerId = $("#leaderInput").val();
+        let errorMessage = "";
+
+        if (leaderStalkerId === "") {
+            errorMessage = "Необходимо выбрать лидера, или оставить по умолчанию.";
+        }
+
+        if (errorMessage) {
+            $("#leaderError").text(errorMessage).show();
+            return false;
+        } else {
+            $("#leaderError").hide();
+            return true;
+        }
+    }
+
+    // Функция для обновления состояния кнопки
+    function updateAddClanButtonState() {
+        const isClanNameValid = validateClanName();
+        const isLocationValid = validateLocation();
+        const isLeaderValid = true; // Лидер может быть не выбран
+
+        // Если название и расположение валидны, активируем кнопку
+        if (isClanNameValid && isLocationValid) {
+            $("#addClanButton").prop("disabled", false).css("background-color", "#4CAF50");
+        } else {
+            $("#addClanButton").prop("disabled", true).css("background-color", "lightgrey");
+        }
+    }
+
+    // Изначальная проверка, чтобы блокировать кнопку, если поле пустое
+    updateAddClanButtonState();
+});
+
+
+
+
+
+        $(document).ready(function() {
+            $("#openAddClanModal").click(function() {
+                $("#addClanModal").css("display", "flex");
+            });
+        });
+
+        function closeAddClanModal() {
+            $("#addClanModal").css("display", "none");
+        }
+
+        function addClan() {
+            var formData = $("#addClanForm").serializeArray();
+
+            // Логируем данные перед отправкой
+            console.log("Form Data: ", formData);
+
+            $.ajax({
+                url: '@Url.Action("Add", "Clan")',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        $("#addClanError").text("Ошибка при добавлении клана.").show();
+                    }
+                },
+                error: function () {
+                    $("#addClanError").text("Ошибка при добавлении клана. Попробуйте еще раз.").show();
+                }
+            });
+        }
+
+
+function openEditModal(clan) {
+    // Заполняем поля формы значениями существующего клана
+    $("#editClanId").val(clan.ClanId);
+    $("#editName").val(clan.Name);
+    $("#editLocation").val(clan.Location);
+    $("#editLeaderStalkerId").val(clan.LeaderStalkerId || ""); // Если LeaderStalkerId null, оставляем поле пустым
+
+    // Показываем модальное окно
+    $("#editModal").show();
+}
+
+
+
+function updateClan() {
+    var formData = $("#editClanForm").serialize();
+
+    // Логируем данные перед отправкой
+    console.log("Form Data: ", formData);
+
+    $.ajax({
+        url: '@Url.Action("Edit", "Clan")',
+        type: 'POST',
+        data: formData,
+        success: function (response) {
+            if (response.success) {
+                location.reload();
+            } else {
+                $("#editClanError").text("Ошибка при редактировании клана.").show();
+            }
+        },
+        error: function () {
+            $("#editClanError").text("Ошибка при редактировании клана. Попробуйте еще раз.").show();
+        }
+    });
+}
+
+
+
+
+
+        function deleteClan(id) {
+            if (confirm("Вы уверены, что хотите удалить этот клан?")) {
+                $.ajax({
+                    url: '@Url.Action("Delete", "Clan")',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert("Ошибка при удалении клана.");
+                        }
+                    },
+                    error: function () {
+                        alert("Ошибка при удалении клана.");
+                    }
+                });
+            }
+        }
+
+        function showEditForm(id, name, location, leaderId) {
+            $("#editClanId").val(id);
+            $("#editName").val(name);
+            $("#editLocation").val(location);
+            $("#editLeaderStalkerId").val(leaderId);
+            $("#editModal").css("display", "flex");
+        }
+
+        function closeEditModal() {
+            $("#editModal").css("display", "none");
+        }
+
+        function saveClan() {
+            var formData = $("#editClanForm").serialize();
+
+            $.ajax({
+                url: '@Url.Action("Edit", "Clan")',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        $("#editClanError").text("Ошибка при сохранении изменений.").show();
+                    }
+                },
+                error: function () {
+                    $("#editClanError").text("Ошибка при сохранении изменений. Попробуйте еще раз.").show();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

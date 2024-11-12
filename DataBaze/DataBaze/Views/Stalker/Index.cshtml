@@ -1,0 +1,682 @@
+﻿@model IEnumerable<DataBaze.Stalker.Models.Stalker>
+@using Microsoft.AspNetCore.Http
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список Сталкеров</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            max-width: 800px;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .buttonADD {
+            width: 100%;
+            max-width: 280px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-height: 80%;
+            overflow-y: auto
+
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal-form label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        .modal-form input[type="text"],
+        .modal-form select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .modal-form button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .modal-form button:hover {
+            background-color: #45a049;
+        }
+        .error-message {
+            color: red;
+            margin-bottom: 15px;
+        }
+        .success-message {
+            color: green;
+            margin-bottom: 15px;
+        }
+    /* Модальное окно */
+    #photoModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #photoModal > div {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 300px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Заголовок */
+    #photoModal h2 {
+        margin-bottom: 20px;
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    /* Стиль для предварительного просмотра изображения */
+    #imagePreview {
+        margin-top: 10px;
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 8px;
+    }
+
+    /* Кнопки */
+    button {
+        background-color: #4CAF50; /* Зеленый фон */
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        margin: 10px 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #45a049; /* Более темный зеленый на ховер */
+        transform: translateY(-2px); /* Легкий подъем кнопки */
+    }
+
+    button:active {
+        background-color: #388e3c; /* Еще более темный при нажатии */
+        transform: translateY(2px); /* Поджатие кнопки */
+    }
+
+    /* Кнопка закрытия */
+    .close-btn {
+        background-color: #f44336; /* Красный фон */
+    }
+
+    .close-btn:hover {
+        background-color: #e53935;
+    }
+
+    /* Поле ввода файла */
+    input[type="file"] {
+        margin: 10px 0;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        width: 100%;
+    }
+    </style>
+</head>
+<body>
+<h1>Список Сталкеров</h1>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Фотография</th>
+            <th>Фамилия</th>
+            <th>Имя</th>
+            <th>Отчество</th>
+            <th>Никнейм</th>
+            <th>PdaId</th>
+            <th>Клан ID</th>
+            <th>Локация</th>
+            <th>Ранг ID</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+            @foreach (var stalker in Model)
+            {
+                <tr id="stalker-@stalker.StalkerId">
+                    <td>@stalker.StalkerId</td>
+                    <td>
+                        @if (stalker.Avatar != null)
+                        {
+                                <img src="@stalker.Avatar.ImagePath" alt="Avatar" style="width:50px;height:50px;" />
+                        }
+                    </td>
+                    <td>@stalker.LastName</td>
+                    <td>@stalker.FirstName</td>
+                    <td>@stalker.MiddleName</td>
+                    <td>@stalker.Nickname</td>
+                    <td>@stalker.PdaId</td>
+                    <td>@stalker.ClanId</td>
+                    <td>@stalker.Location</td>
+                    <td>@stalker.RankId</td>
+                    <td>
+                                        @if (ViewBag.UserRole == "Admin")
+                                        {
+                                <button onclick="openPhotoModal(@stalker.StalkerId)" class="button">
+                                    <i class="fas fa-camera icon"></i> Добавить фотографию
+                                </button>
+                                <button onclick="deleteStalker(@stalker.StalkerId)" class="button">
+                                    <i class="fas fa-trash-alt icon"></i> Удалить
+                                </button>
+                                        }
+                    </td>
+                </tr>
+            }
+    </tbody>
+</table>
+
+<!-- Модальное окно для добавления фотографии -->
+<div id="photoModal" style="display:none;">
+    <div>
+        <h2>Добавить/Предпросмотр фотографии</h2>
+
+        <!-- Поле для выбора файла -->
+        <input type="file" id="avatarInput" accept="image/*" onchange="previewImage(event)" />
+
+        <!-- Предпросмотр изображения -->
+        <img id="imagePreview" src="" alt="Image Preview" style="display:none; width: 100px; height: 100px;" />
+
+        <!-- Кнопки -->
+        <div>
+            <button onclick="uploadPhoto()">Сохранить</button>
+            <button onclick="closePhotoModal()" class="close-btn">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+
+    <div>
+        <button onclick="window.location.href='@Url.Action("Index", new { page = ViewBag.CurrentPage - 1 })'" 
+                class="button" 
+                @(ViewBag.CurrentPage <= 1 ? "disabled" : "")>
+            Назад
+        </button>
+
+        <span>Страница @ViewBag.CurrentPage из @ViewBag.TotalPages</span>
+
+        <button onclick="window.location.href='@Url.Action("Index", new { page = ViewBag.CurrentPage + 1 })'" 
+                class="button" 
+                @(ViewBag.CurrentPage >= ViewBag.TotalPages ? "disabled" : "")>
+            Вперед
+        </button>
+    </div>
+
+    @if (ViewBag.UserRole == "Admin")
+    {
+                <button id="openModalBtn" class="buttonADD">Добавить нового сталкера</button>
+    }
+
+   <!-- Модальное окно для добавления сталкера -->
+    <div id="addStalkerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Добавить нового сталкера</h2>
+            <div id="addStalkerError" class="error-message"></div>
+            <form id="addStalkerForm" class="modal-form">
+
+                <div id="lastNameError" class="error-message" style="display: none;"></div>
+                <label>Фамилия:</label>
+                <input type="text" name="LastName" placeholder="Обязательно" required maxlength="50" id="lastNameInput" />
+
+                <div id="firstNameError" class="error-message" style="display: none;"></div>
+                <label>Имя:</label>
+                <input type="text" name="FirstName" placeholder="Обязательно" required maxlength="50" id="firstNameInput" />
+
+                <div id="middleNameError" class="error-message" style="display: none;"></div>
+                <label>Отчество:</label>
+                <input type="text" name="MiddleName" placeholder="Обязательно" maxlength="50" id="middleNameInput" />
+
+                <div id="nicknameError" class="error-message" style="display: none;"></div>
+                <label>Никнейм:</label>
+                <input type="text" name="Nickname" placeholder="Обязательно" required maxlength="50" id="nicknameInput" />
+
+                <div id="pdaIdError" class="error-message" style="display: none;"></div>
+                <label>PdaId:</label>
+                <input type="text" name="PdaId" placeholder="Обязательно" required id="pdaInput" />
+
+                <div id="clanError" class="error-message" style="display: none;"></div>
+                <label>Клан:</label>
+                <select name="ClanId" required>
+                    <option value="">Выберите клан</option>
+                        @foreach (var clan in ViewBag.Clans)
+                        {
+                            <option value="@clan.ClanId">@clan.Name</option>
+                        }
+                </select>
+
+                <label>Локация:</label>
+                <input type="text" name="Location" placeholder="Необязательно" />
+
+                <div id="rankError" class="error-message" style="display: none;"></div>
+                <label>Ранг:</label>
+                <select name="RankId" required>
+                    <option value="">Выберите ранг</option>
+                        @foreach (var rank in ViewBag.Ranks)
+                        {
+                            <option value="@rank.RankId">@rank.RankName</option>
+                        }
+                </select>
+
+                <button type="button" onclick="addStalker()">Добавить</button>
+            </form>
+        </div>
+    </div>
+
+    <a href="http://localhost:5000/Home" class="button">Вернуться на главную страницу</a>
+
+    <script>
+         $(document).ready(function () {
+        // Проверка валидации всех полей при вводе
+        $(".modal-form input, .modal-form select").on("input change", function () {
+            updateAddButtonState();
+        });
+
+        // Изначально блокируем кнопку "Добавить"
+        updateAddButtonState();
+    });
+
+    function validateLastName() {
+        const lastName = $("#lastNameInput").val();
+        const namePattern = /^[A-Za-zА-Яа-яЁё\s]+$/; // Регулярное выражение для проверки букв
+        let errorMessage = "";
+
+        // Проверка длины и содержимого
+        if (lastName.length > 50) {
+            errorMessage = "Фамилия не может превышать 50 символов.";
+        } else if (!namePattern.test(lastName)) {
+            errorMessage = "Фамилия должна содержать только буквы.";
+        }
+
+        // Отображаем или скрываем сообщение об ошибке
+        if (errorMessage) {
+            $("#lastNameError").text(errorMessage).show();
+            return false;
+        } else {
+            $("#lastNameError").hide();
+            return true;
+        }
+    }
+
+    function validateFirstName() {
+        const firstName = $("#firstNameInput").val();
+        const namePattern = /^[A-Za-zА-Яа-яЁё\s]+$/;
+        let errorMessage = "";
+
+        if (firstName.length === 0) {
+            errorMessage = "Имя обязательно для заполнения.";
+        } else if (firstName.length > 50) {
+            errorMessage = "Имя не может превышать 50 символов.";
+        } else if (!namePattern.test(firstName)) {
+            errorMessage = "Имя должно содержать только буквы.";
+        }
+
+        if (errorMessage) {
+            $("#firstNameError").text(errorMessage).show();
+            return false;
+        } else {
+            $("#firstNameError").hide();
+            return true;
+        }
+    }
+
+    function validateMiddleName() {
+        const middleName = $("#middleNameInput").val();
+        const namePattern = /^[A-Za-zА-Яа-яЁё\s]*$/; // Позволяем пустую строку для отчества
+        let errorMessage = "";
+
+        if (middleName.length > 50) {
+            errorMessage = "Отчество не может превышать 50 символов.";
+        } else if (!namePattern.test(middleName)) {
+            errorMessage = "Отчество должно содержать только буквы.";
+        }
+
+        if (errorMessage) {
+            $("#middleNameError").text(errorMessage).show();
+            return false;
+        } else {
+            $("#middleNameError").hide();
+            return true;
+        }
+    }
+
+    function validateNickname() {
+        const nickname = $("#nicknameInput").val();
+        const nicknamePattern = /^[A-Za-zА-Яа-яЁё0-9_]{1,50}$/; // Можно использовать буквы, цифры и подчеркивание
+        let errorMessage = "";
+
+        if (nickname.length === 0) {
+            errorMessage = "Никнейм обязателен для заполнения.";
+        } else if (nickname.length > 50) {
+            errorMessage = "Никнейм не может превышать 50 символов.";
+        } else if (!nicknamePattern.test(nickname)) {
+            errorMessage = "Никнейм должен содержать только буквы, цифры и подчеркивание.";
+        }
+
+        if (errorMessage) {
+            $("#nicknameError").text(errorMessage).show();
+            return false;
+        } else {
+            $("#nicknameError").hide();
+            return true;
+        }
+    }
+
+    function validatePdaId() {
+        const pdaId = $("#pdaInput").val();
+        const pdaPattern = /^[A-Za-z0-9]{3}$/; // Ровно три символа, буквы и цифры
+
+        let errorMessage = "";
+        if (pdaId.length === 0) {
+            errorMessage = "PdaId обязателен для заполнения.";
+        } else if (!pdaPattern.test(pdaId)) {
+            errorMessage = "PdaId должен содержать ровно 3 символа (буквы или цифры).";
+        }
+
+        if (errorMessage) {
+            $("#pdaIdError").text(errorMessage).show();
+            return false;
+        } else {
+            $("#pdaIdError").hide();
+            return true;
+        }
+    }
+
+    $("#pdaInput").on("input", function () {
+        const pdaId = $(this).val();
+        if (pdaId.length === 3) { // Проверяем, что длина PdaId равна 3
+            $.ajax({
+                url: '@Url.Action("CheckPdaIdUnique", "Stalker")',
+                type: 'GET',
+                data: { pdaId: pdaId },
+                success: function (response) {
+                    if (!response.isUnique) {
+                        alert("Такой PdaId уже существует."); // Показываем подтверждающее окно с ошибкой
+                        $("#pdaInput").val(''); // Удаляем значение из поля PdaId
+                    } else {
+                        $("#pdaIdError").hide();
+                    }
+                    updateAddButtonState();
+                },
+                error: function () {
+                    $("#pdaIdError").text("Ошибка проверки PdaId. Попробуйте снова.").show();
+                }
+            });
+        } else {
+            $("#pdaIdError").hide(); // Если длина не 3, скрываем ошибку
+        }
+    });
+
+    function validateClan() {
+        const clanId = $("select[name='ClanId']").val();
+        if (clanId === "") {
+            $("#clanError").text("Пожалуйста, выберите клан.").show();
+            return false;
+        } else {
+            $("#clanError").hide();
+            return true;
+        }
+    }
+
+    function validateRank() {
+        const rankId = $("select[name='RankId']").val();
+        if (rankId === "") {
+            $("#rankError").text("Пожалуйста, выберите ранг.").show();
+            return false;
+        } else {
+            $("#rankError").hide();
+            return true;
+        }
+    }
+
+
+
+    function updateAddButtonState() {
+        const isLastNameValid = validateLastName();
+        const isFirstNameValid = validateFirstName();
+        const isMiddleNameValid = validateMiddleName();
+        const isNicknameValid = validateNickname();
+        const isPdaIdValid = validatePdaId();
+        const isClanSelected = validateClan();
+        const isRankSelected = validateRank();
+
+        if (isLastNameValid && isFirstNameValid && isMiddleNameValid && isNicknameValid && isPdaIdValid && isClanSelected && isRankSelected) {
+            $("button[type='button']").prop("disabled", false).css("background-color", "#4CAF50");
+        } else {
+            $("button[type='button']").prop("disabled", true).css("background-color", "lightgrey");
+        }
+    }
+
+        document.getElementById("openModalBtn").onclick = function() {
+            document.getElementById("addStalkerModal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("addStalkerModal").style.display = "none";
+        }
+
+        function deleteStalker(id) {
+            if (confirm("Вы уверены, что хотите удалить этого сталкера?")) {
+                $.ajax({
+                    url: '@Url.Action("Delete", "Stalker")',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (response) {
+                        if (response.success) {
+                            $("#stalker-" + id).remove();
+                        } else {
+                            alert("Ошибка при удалении сталкера.");
+                        }
+                    },
+                    error: function () {
+                        alert("Ошибка при удалении сталкера.");
+                    }
+                });
+            }
+        }
+
+function openPhotoModal(stalkerId) {
+    // Установите идентификатор сталкера, чтобы использовать его при загрузке фотографии
+    currentStalkerId = stalkerId;
+    document.getElementById('photoModal').style.display = 'flex';
+}
+
+    function closePhotoModal() {
+        document.getElementById('photoModal').style.display = 'none';
+        // Очищаем предварительный просмотр изображения
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('imagePreview').src = '';
+    }
+
+    function previewImage(event) {
+        var reader = new FileReader();
+        reader.onload = function () {
+            var imagePreview = document.getElementById('imagePreview');
+            imagePreview.style.display = 'block';
+            imagePreview.src = reader.result;
+        }
+        reader.readAsDataURL(event.target.files[0]);
+    }
+
+async function uploadPhoto() {
+    const fileInput = document.getElementById('avatarInput');
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append("avatarFile", file);
+    formData.append("stalkerId", currentStalkerId);
+
+    // Отправьте запрос на сервер для загрузки фотографии
+    const response = await fetch('/Stalker/UploadAvatar', {
+        method: 'POST',
+        body: formData
+    });
+
+    const result = await response.json();
+    if (result.success) {
+        // Обновите изображение в таблице
+        const avatarImageElement = document.querySelector(`#stalker-${currentStalkerId} img`);
+        avatarImageElement.src = result.imagePath; // Обновляем src у изображения
+        avatarImageElement.style.display = 'block'; // Показываем изображение
+        alert('Фотография сохранена!');
+        closePhotoModal();
+    } else {
+        alert(result.message); // Сообщаем об ошибке
+    }
+}
+
+
+
+
+
+
+        function addStalker() {
+            var clanId = $("select[name='ClanId']").val();
+            var rankId = $("select[name='RankId']").val();
+            var pdaInput = $("#pdaInput").val();
+            var pdaId = "PDA" + pdaInput.padStart(3, '0');
+            $("input[name='PdaId']").val(pdaId);
+
+            var formData = new FormData();
+            formData.append("LastName", $("input[name='LastName']").val());
+            formData.append("FirstName", $("input[name='FirstName']").val());
+            formData.append("MiddleName", $("input[name='MiddleName']").val() || null);
+            formData.append("Nickname", $("input[name='Nickname']").val());
+            formData.append("PdaId", pdaId);
+            formData.append("ClanId", clanId);
+            formData.append("Location", $("input[name='Location']").val() || null);
+            formData.append("RankId", rankId);
+
+            $.ajax({
+                url: '@Url.Action("Create", "Stalker")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        $("#addStalkerError").text("Ошибка при добавлении сталкера: " + response.errors.join(", ")).show();
+                    }
+                },
+                error: function () {
+                    $("#addStalkerError").text("Ошибка при добавлении сталкера.").show();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
